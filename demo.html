@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./mvvm.js"></script>
+    <title>mvvm demo</title>
+  </head>
+
+  <body>
+    <div id="app" class="container flex">
+      <div class="on flex">
+        <h4>{{title1}}</h4>
+        <div class="content">
+          <p>{{data.content}}</p>
+        </div>
+      </div>
+      <div class="v-model flex">
+        <h4>{{title2}}</h4>
+        <input v-model="input" />
+        <div>{{input}}</div>
+      </div>
+      <div class="flex">
+        <h4>{{title3}}</h4>
+        <button @click="sayHi">say hi</button>
+      </div>
+    </div>
+    <style>
+      .flex {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 90%;
+        padding: 20px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+
+      .container {
+        width: 50%;
+        height: 520px;
+        padding: 20px 0;
+        margin-top: 100px;
+        margin-left: 50%;
+        transform: translateX(-50%);
+        border: 2px solid #9b9a9a;
+      }
+
+      .on {}
+    </style>
+  </body>
+
+  <script>
+    const mvvm = new MVVM({
+      el: '#app',
+      data: {
+        title1: '数据绑定',
+        title2: '双向数据绑定',
+        title3: '事件绑定',
+        data: {
+          content: '赛高'
+        },
+        input: '双向数据绑定'
+      },
+      methods: {
+        sayHi() {
+          alert('Hi');
+        }
+      },
+    });
+  </script>
+
+</html>
