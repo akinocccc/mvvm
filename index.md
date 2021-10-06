@@ -1,37 +1,98 @@
-## Welcome to GitHub Pages
+<!DOCTYPE html>
+<html lang="en">
 
-You can use the [editor on GitHub](https://github.com/vkm0303/mvvm/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./mvvm.js"></script>
+    <title>mvvm demo</title>
+  </head>
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+  <body>
+    <div id="app" class="container flex">
+      <div class="on flex">
+        <h4>{{title1}}</h4>
+        <div class="content">
+          <p>{{data.content}}</p>
+        </div>
+      </div>
+      <div class="v-model flex">
+        <h4>{{title2}}</h4>
+        <input v-model="input" />
+        <div class="">{{input}}</div>
+      </div>
+      <div class="flex">
+        <h4>{{title3}}</h4>
+        <button @click="sayHi" v-show="isShow2">say hi</button>
+      </div>
+      <div class="flex">
+        <h4 v-show="isShow">{{title4}}</h4>
+        <!-- <div>{{isShow}}</div> -->
+        <button @click="isShowTitle">{{buttonText}}</button>
+        <!-- <button id="test">test</button> -->
+      </div>
+    </div>
+    <style>
+      .flex {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 90%;
+        padding: 20px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
 
-### Markdown
+      .container {
+        width: 50%;
+        /* height: 520px; */
+        padding: 20px 0;
+        margin-top: 50px;
+        margin-left: 50%;
+        transform: translateX(-50%);
+        border: 2px solid #9b9a9a;
+      }
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+      .on {}
+    </style>
+  </body>
 
-```markdown
-Syntax highlighted code block
+  <script>
+    const mvvm = new MVVM({
+      el: '#app',
+      data: {
+        title1: '数据绑定',
+        title2: '双向绑定展示',
+        title3: 'click事件绑定methods中的方法',
+        title4: 'v-show指令',
+        data: {
+          content: '赛高'
+        },
+        input: '双向数据绑定',
+        buttonText: '隐藏标题',
+        isShow: true,
+        isShow2: true,
+      },
+      methods: {
+        sayHi() {
+          this.title3 = 'Hi!';
+        },
+        isShowTitle() {
+          this.isShow = !this.isShow;
+          if (this.isShow) {
+            this.buttonText = '隐藏标题';
+          } else {
+            this.buttonText = '显示标题';
+          }
+        }
+      },
+    });
+    // document.getElementById('test').addEventListener('click', function () {
+    //   mvvm.isShow = !mvvm.isShow;
+    // });
 
-# Header 1
-## Header 2
-### Header 3
+  </script>
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/vkm0303/mvvm/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+</html>
