@@ -3,9 +3,11 @@ class MVVM {
     this.$options = options;
     this.$data = options.data;
     this.$methods = options.methods;
+    this.$data.vShow = [];
     new Observer(this.$data);
     this._proxy(this.$data);
     this._proxy(this.$methods);
+    this._bind(this.$methods);
     new Compile(options.el, this);
   }
   // vm代理，this代理this.$data，即可以直接使用this.key访问data的数据
@@ -16,14 +18,21 @@ class MVVM {
           enumerable: true, // 可被枚举
           set: function (newVal) {
             // console.log(`${key}的值改变为`, newVal)
-            this.$data[key] = newVal;
+            data[key] = newVal;
           },
           get: function () {
             // console.log(`获取${key}的值为`, this.$data[key])
-            return this.$data[key];
+            return data[key];
           }
         });
       }
+    }
+  }
+
+  // 将methods里的方法的this绑定到实例上，在methods中可以使用this.key来访问data里的数据
+  _bind(methods) {
+    for (let key in methods) {
+      methods[key] = methods[key].bind(this);
     }
   }
 }
@@ -69,13 +78,15 @@ class Watcher {
     exp.split('.').forEach(key => {
       val = val[key];
     });
-    Dep.target = null;
   }
 
   update() {
     let val = this.vm;
     this.exp.split('.').forEach(key => {
       val = val[key];
+    });
+    this.vm.vShow.forEach(obj => {
+      obj.node.style.display = this.vm[obj.key] ? '' : 'none';
     });
     this.cb(val);
   }
@@ -94,16 +105,6 @@ class Dep {
     this.subscribeObj[key].update();
   }
 }
-// function Dep() {
-//   this.subs = [];
-// }
-
-// Dep.prototype.subscribe = function (sub) {
-//   this.subs.push(sub);
-// };
-// Dep.prototype.notify = function () {
-//   this.subs.forEach(sub => sub.update());
-// };
 
 class Compile {
   constructor(el, vm) {
@@ -122,41 +123,57 @@ class Compile {
     Array.from(fragment.childNodes).forEach(node => {
       let text = node.textContent;
       let reg = /\{\{(.*?)\}\}/g;
-
       /*
        * nodeType: 1 元素节点，3 文本节点
        */
       if (node.nodeType === 3 && reg.test(text)) {
-        function replaceText() {
+        console.log(node)
+        function _replaceText() {  // 替换节点文本
           node.textContent = text.replace(reg, (matched, placeholder) => {
-            // console.log(placeholder);
-            new Watcher(vm, placeholder, replaceText);
+            console.log(matched)
+            new Watcher(vm, placeholder, _replaceText);
             return placeholder.split('.').reduce((val, key) => {
-              // console.log(val, key);
               return val[key];
             }, vm);
           });
         }
-        replaceText();
-      } else if (node.nodeType === 1) {
+        _replaceText();
+      }
+      if (node.nodeType === 1) {
         let attrs = node.attributes;     // 获取dom节点的属性
-        // console.log(attrs);
         Array.from(attrs).forEach(attr => {
           let name = attr.name;
-          let exp = attr.value;   // v-model="c"
-          if (name.includes('v-')) {  // v-model
+          let exp = attr.value;
+          if (name.includes('v-model')) {  // v-model
             node.value = vm[exp];
-          } else if (name.includes('@click')) {
+          } else if (name.includes('@click')) { //绑定点击事件
             console.log(vm);
-            node.addEventListener('click', vm.$methods[exp]);
+            node.addEventListener('click', vm[exp]);
+          } else if (name.includes('v-show')) {
+            vm.vShow.push({
+              node,
+              type: 'v-show',
+              key: exp
+            });
+            node.style.display = vm[exp] ? '' : 'none';
+            console.log(vm[exp], 1);
           }
           new Watcher(vm, exp, function (newVal) {
             node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
           });
-          node.addEventListener('input', function (e) {
+          node.addEventListener('input', function (e) { // 监听input事件，输入时更新数据
             let newVal = e.target.value;
+            let val = vm;
+            let k = exp;
+            console.log(exp)
+            // exp.split('.').forEach(key => {
+            //   k = key;
+            //   if (typeof val[key] === 'object') {
+            //     //val = val[key];
+            //   }
+            // });
             vm[exp] = newVal;
-            console.log(vm);
+            // new Observer()._traverse(val[k]);
           });
         });
       }
