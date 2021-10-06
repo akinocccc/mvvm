@@ -1,13 +1,14 @@
 class MVVM {
   constructor(options = {}) {
     this.$options = options;
-    this.$data = options.data;
-    this.$methods = options.methods;
-    this.$data.vShow = [];
-    new Observer(this.$data);
-    this._proxy(this.$data);
-    this._proxy(this.$methods);
-    this._bind(this.$methods);
+    // this.$data = options.data; 
+    // this.$methods = options.methods;
+    // this.$data.vShow = [];
+    options.data.vShow = [];
+    new Observer(options.data);
+    this._proxy(options.data);
+    this._proxy(options.methods);
+    this._bind(options.methods);
     new Compile(options.el, this);
   }
   // vm代理，this代理this.$data，即可以直接使用this.key访问data的数据
@@ -124,12 +125,11 @@ class Compile {
   _replace(fragment, vm) {
     Array.from(fragment.childNodes).forEach(node => {
       let text = node.textContent;
-      let reg = /\{\{(.*?)\}\}/g;
+      let reg = /\{\{(.*?)\}\}/g;  // 匹配{{}}的内容
       /*
        * nodeType: 1 元素节点，3 文本节点
        */
       if (node.nodeType === 3 && reg.test(text)) {
-        // console.log(node)
         function _replaceText() {  // 替换节点文本
           node.textContent = text.replace(reg, (matched, placeholder) => {
             console.log(matched, placeholder)
@@ -149,13 +149,9 @@ class Compile {
           let exp = attr.value;
           if (name.includes('v-model')) {  // v-model
             node.value = vm[exp];
-            new Watcher(vm, exp, function (newVal) {
-              node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
-            });
           } else if (name.includes('@click')) { // 绑定点击事件
-            // console.log(vm);
             node.addEventListener('click', vm[exp]);
-          } else if (name.includes('v-show')) { // v-show
+          } else if (name.includes('v-show')) { // v-show指令处理
             vm.vShow.push({
               node,
               type: 'v-show',
@@ -163,28 +159,18 @@ class Compile {
             });
             node.style.display = vm[exp] ? '' : 'none';
             console.log(vm);
-            new Watcher(vm, exp, function (newVal) {
-              node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
-            });
           }
+          new Watcher(vm, exp, function (newVal) {
+            node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
+          });
           node.addEventListener('input', function (e) { // 监听input事件，输入时更新数据
             let newVal = e.target.value;
-            let val = vm;
-            let k = exp;
-            // console.log(exp)
-            // exp.split('.').forEach(key => {
-            //   k = key;
-            //   if (typeof val[key] === 'object') {
-            //     //val = val[key];
-            //   }
-            // });
             vm[exp] = newVal;
-            // new Observer()._traverse(val[k]);
           });
         });
       }
       if (node.childNodes && node.childNodes.length) {
-        this._replace(node, vm);
+        this._replace(node, vm);  // 递归遍历节点
       }
     });
   }
