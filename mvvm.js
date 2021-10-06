@@ -83,8 +83,10 @@ class Watcher {
   update() {
     let val = this.vm;
     this.exp.split('.').forEach(key => {
+      console.log(key)
       val = val[key];
     });
+    console.log(this.vm)
     this.vm.vShow.forEach(obj => {
       obj.node.style.display = this.vm[obj.key] ? '' : 'none';
     });
@@ -127,10 +129,10 @@ class Compile {
        * nodeType: 1 元素节点，3 文本节点
        */
       if (node.nodeType === 3 && reg.test(text)) {
-        console.log(node)
+        // console.log(node)
         function _replaceText() {  // 替换节点文本
           node.textContent = text.replace(reg, (matched, placeholder) => {
-            console.log(matched)
+            console.log(matched, placeholder)
             new Watcher(vm, placeholder, _replaceText);
             return placeholder.split('.').reduce((val, key) => {
               return val[key];
@@ -142,30 +144,34 @@ class Compile {
       if (node.nodeType === 1) {
         let attrs = node.attributes;     // 获取dom节点的属性
         Array.from(attrs).forEach(attr => {
+          console.log(attr)
           let name = attr.name;
           let exp = attr.value;
           if (name.includes('v-model')) {  // v-model
             node.value = vm[exp];
-          } else if (name.includes('@click')) { //绑定点击事件
-            console.log(vm);
+            new Watcher(vm, exp, function (newVal) {
+              node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
+            });
+          } else if (name.includes('@click')) { // 绑定点击事件
+            // console.log(vm);
             node.addEventListener('click', vm[exp]);
-          } else if (name.includes('v-show')) {
+          } else if (name.includes('v-show')) { // v-show
             vm.vShow.push({
               node,
               type: 'v-show',
               key: exp
             });
             node.style.display = vm[exp] ? '' : 'none';
-            console.log(vm[exp], 1);
+            console.log(vm);
+            new Watcher(vm, exp, function (newVal) {
+              node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
+            });
           }
-          new Watcher(vm, exp, function (newVal) {
-            node.value = newVal;    // 当watcher触发时会自动将内容放进输入框中
-          });
           node.addEventListener('input', function (e) { // 监听input事件，输入时更新数据
             let newVal = e.target.value;
             let val = vm;
             let k = exp;
-            console.log(exp)
+            // console.log(exp)
             // exp.split('.').forEach(key => {
             //   k = key;
             //   if (typeof val[key] === 'object') {

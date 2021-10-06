@@ -20,7 +20,7 @@
       <div class="v-model flex">
         <h4>{{title2}}</h4>
         <input v-model="input" />
-        <div class="">{{input}}{{title2}}</div>
+        <div class="">{{input}}</div>
       </div>
       <div class="flex">
         <h4>{{title3}}</h4>
@@ -28,8 +28,9 @@
       </div>
       <div class="flex">
         <h4 v-show="isShow">{{title4}}</h4>
-        <div>{{isShow}}</div>
+        <!-- <div>{{isShow}}</div> -->
         <button @click="isShowTitle">{{buttonText}}</button>
+        <!-- <button id="test">test</button> -->
       </div>
     </div>
     <style>
@@ -76,7 +77,7 @@
       },
       methods: {
         sayHi() {
-          alert('Hi');
+          this.title3 = 'Hi!';
         },
         isShowTitle() {
           this.isShow = !this.isShow;
@@ -88,6 +89,10 @@
         }
       },
     });
+    // document.getElementById('test').addEventListener('click', function () {
+    //   mvvm.isShow = !mvvm.isShow;
+    // });
+
   </script>
 
 </html>
